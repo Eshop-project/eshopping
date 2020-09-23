@@ -1,13 +1,13 @@
-#from django.contrib import admin
+
 from django.urls import path
-#from django.contrib import admin
 from . import views
 
-from .views import PageView
+#from .views import PageView
 
 
 urlpatterns = [
     #path(r'admin/', admin.site.urls),
-    path('', PageView.as_view()),
-    path('<str:template>', PageView.as_view()),
+    path('', views.store, name="store"),
+    path('cart/', views.cart, name="cart"),
+    path('checkout/', views.checkout, name="checkout"),
 ]
