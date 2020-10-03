@@ -51,7 +51,11 @@
       </ul>
 
       <div class="form-inline my-2 my-lg-0">
-        <a href="#" class="btn btn-success">Login</a>
+        {% if user.is_active %}
+          <a href="{% url 'logout' %}?next={% url 'store' %}" class="btn btn-success">LogOut</a>
+        {% else %}
+          <a href="{% url 'login' %}?next={% url 'store' %}" class="btn btn-success">Login</a>
+        {% endif %}
         <a href="{% url 'cart' %}">
           <img id="cart-icon" src="{% static 'img/logo.PNG' %}">
         </a>
