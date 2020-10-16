@@ -12,7 +12,7 @@
   <link rel="stylesheet" type="text/css" href="{% static 'css/main.css'%}">
 
   <script type="text/javascript">
-    var user = '{{request.user}}'
+    var user = '{{ request.user }}'
 
     function getToken(name) {
       let cookieValue = null;
@@ -51,10 +51,10 @@
       </ul>
 
       <div class="form-inline my-2 my-lg-0">
-        <a href="{% url 'signup' %}?next={% url 'login' %}" class="btn btn-success">SignUp</a>
         {% if user.is_active %}
           <a href="{% url 'logout' %}?next={% url 'store' %}" class="btn btn-success">LogOut</a>
         {% else %}
+          <a href="{% url 'signup' %}?next={% url 'login' %}" class="btn btn-success">SignUp</a>
           <a href="{% url 'login' %}?next={% url 'store' %}" class="btn btn-success">Login</a>
         {% endif %}
         <a href="{% url 'cart' %}">
