@@ -7,7 +7,17 @@ def store(request):
 
     if request.user.is_authenticated:
         user = request.user
-        customer = request.user.customer
+
+        ##  Checks for customer object that has a matching user. If not then it returns and makes a new one.
+
+        try:
+            Customer.objects.get(user=user)
+        except:
+            customer = Customer.create(user, user.first_name, user.email)
+            customer.save()
+
+        customer = Customer.objects.get(user=user)
+
         order, created = Order.objects.get_or_create(customer=customer, complete=False)
         items = order.orderitem_set.all()
         cartItems = order.get_cart_items
