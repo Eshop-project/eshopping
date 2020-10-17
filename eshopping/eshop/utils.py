@@ -5,9 +5,10 @@ def cookieCart(request):
     try:
         cart = json.loads(request.COOKIES['cart'])
     except:     # test purposes
-        if request.test_cart:
-            cart = request.test_cart
-        else:
+        try:
+            if request.test_cart:
+                cart = request.test_cart
+        except: 
             cart = {}
     print('Cart:', cart)
 
