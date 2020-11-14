@@ -1,16 +1,17 @@
 import json
 from . models import *
 
+# Used to get customer object.
+
 def cookieCart(request):
     try:
         cart = json.loads(request.COOKIES['cart'])
-    except:     # test purposes
+    except:     # test purposes: ADDED ANOTHER TRY AND IF REQUEST HAS TEST OBJECT PASSED THEN WE WILL USE THAT INSTEAD.
         try:
             if request.test_cart:
                 cart = request.test_cart
         except: 
             cart = {}
-    print('Cart:', cart)
 
         
         
@@ -46,7 +47,9 @@ def cookieCart(request):
     
 def cartData(request):
     if request.user.is_authenticated:
-        customer = request.user.customer
+        user = request.user
+
+        customer = Customer.check_user(user)
         order, created = Order.objects.get_or_create(customer=customer, complete=False)
         items = order.orderitem_set.all()
         cartItems = order.get_cart_items

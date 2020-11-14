@@ -9,6 +9,22 @@ class Customer(models.Model):
     def __str__(self):
         return self.name
 
+    @classmethod
+    def create(cls,user):
+        customer = cls(user = user, name = user.username, email = user.email)
+        return customer
+
+    @classmethod
+    def check_user(cls,user):
+        try:
+            return cls.objects.get(user=user)
+        except Exception as error:
+            print('The following error that we got when trying to assign customer object: ', str(error))
+            customer = cls.create(user)
+            customer.save()
+            print('Dealt with exception, created and returned new customer object.')
+            return customer
+
 class Product(models.Model):
     name = models.CharField(max_length=200, null=True)
     price = models.DecimalField(max_digits=7, decimal_places=2)

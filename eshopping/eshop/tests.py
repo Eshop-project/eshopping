@@ -1,98 +1,114 @@
 from django.test import RequestFactory, TestCase
 from django.contrib.auth.models import AnonymousUser, User
-from eshop.models import Order
+from eshop.models import *
 
 from eshop.utils import cartData
 from eshop.views import cart
-
 
 class ViewTest(TestCase):
 
     def test_root_page(self):
         response = self.client.get('/')
-        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.status_code, 200)
 
     def test_root_title(self):
         response = self.client.get('/')
-        self.assertContains(response, '<Title> eshoppning </Title>')
+        self.assertContains(response, '<title>Eshopping</title>')
     
     def test_cart_page(self):
-        response = self.client.get('cart')
-        self.assertEqual(response.status_code, 202)
+        response = self.client.get('/cart/')
+        self.assertEqual(response.status_code, 200)
 
     def test_cart_template(self):
-        response = self.client.get('cart')
+        response = self.client.get('/cart/')
         self.assertTemplateUsed(response, template_name='cart.html')
 
-    def test_checkout_page(self):
-        response = self.client.get('checkout')
-        self.assertEqual(response.status_code, 203)
+        # No longer valid due to the need of a user. Guest checkout test
+        # is below in seperate class.
+
+    # def test_checkout_page(self):
+    #     response = self.client.get('/checkout/')
+    #     self.assertEqual(response.status_code, 203)
     
     def test_checkout_template(self):
-        response = self.client.get('checkout')
+        response = self.client.get('/checkout/')
         self.assertTemplateUsed(response, template_name='checkout.html')
-
-    def test_store_page(self):
-        response = self.client.get('store')
-        self.assertEqual(response.status_code, 204)
     
     def test_store_template(self):
-        response = self.client.get('store')
+        response = self.client.get('')
         self.assertTemplateUsed(response, template_name='store.html')
-    
-    def test_admin_page(self):
-        response = self.client.get('/admin')
-        self.assertEqual(response.status_code, 205)
-    
-    def test_admin_template(self):
-        response = self.client.get('/admin')
-        self.assertTemplateUsed(response, template_name='admin.html')
-    
+
     def test_help(self):
         self.assertTrue(True)
 
+    # No template used to create admin page 
+    # also cannot access the admin page from here because our 
+    # test is for eShop not the whole project    
+"""    
+    def test_admin_page(self):
+        response = self.client.get('admin')
+        self.assertEqual(response.status_code, 205)
+    
+    
+     def test_admin_template(self):
+        response = self.client.get('admin')
+        self.assertTemplateUsed(response, template_name='admin.html') """
+
 class ModelsTest(TestCase):
+    def setUp(self):
+        # Every test needs access to the request factory.
+        self.factory = RequestFactory()
+        self.user = User.objects.create_user(
+            username='Eddie2020', email='test@work.com', password='secret')
+        self.customer = Customer.create(user=self.user) 
+        self.customer.save()
+        self.product = Product.objects.create(name='Guitar', price=500, digital= False)
+        self.product.save()
+        self.order = Order.objects.create(customer=self.customer, complete= False, transaction_id= 56178)
+        self.order.save()
+        self.orderitem = OrderItem.objects.create(product=self.product, order=self.order, quantity= 2)
+        self.orderitem.save()
+        self.shipping = ShippingAddress.objects.create(customer=self.customer, order=self.order, address= '123 drive st', city='Denver', state='CO', zipcode=80123,)
+        self.shipping.save()
+        # Test objects ^
 
     def test_Customer(self):
-        Customer.objects.create(user='Vice', name='Vicente', email= 'test@gmail.com')
-        x = Customer.objects.get(pk=1)
-        self.assertEqual(x.user, 'Vice')
-        self.assertEqual(x.name, 'Vicente')
-        self.assertEqual(x.email, 'test@gmail.com')
+        x = self.customer
+
+        self.assertEqual(x.user, self.user)
+        self.assertEqual(x.name, 'Eddie2020')
+        self.assertEqual(x.email, 'test@work.com')
 
     def test_product(self):
-        Product.objects.create(name='Guitar', price=500, digital= False)
-        x = Product.objects.get(pk=1)
+        x = self.product
         self.assertEqual(x.name, 'Guitar')
         self.assertEqual(x.price, 500)
         self.assertEqual(x.digital, False)
     
     def test_Order(self):
-        Order.objects.create(customer='Bruce', complete= False, transaction_id= 56178)
-        x = Order.objects.get(pk=1)
-        self.assertEqual(x.customer, 'Bruce')
+        x = self.order
+        self.assertEqual(x.customer, self.customer)
         self.assertEqual(x.complete, False)
         self.assertEqual(x.transaction_id, 56178)
     
     def test_OrderItem(self):
-        OrderItem.objects.create(product='Shirt', order=8, quantity= 2)
-        x = OrderItem.objects.get(pk=1)
-        self.assertEqual(x.product, 'Shirt')
-        self.assertEqual(x.order, 8)
+        x = self.orderitem
+        self.assertEqual(x.product, self.product)
+        self.assertEqual(x.order, self.order)
         self.assertEqual(x.quantity, 2)
     
     def test_Shipping(self):
-        ShippingAddress.objects.create(Customer='Rick', order=6, address= '123 drive st', city='Denver', state='CO', zipcode=80123,)
-        x = ShippingAddress.objects.get(pk=1)
-        self.assertEqual(x.customer, 'Rick')
-        self.assertEqual(x.order, 6)
+        x = self.shipping
+        self.assertEqual(x.customer, self.customer)
+        self.assertEqual(x.order, self.order)
         self.assertEqual(x.address, '123 drive st')
-        elf.assertEqual(x.city, 'Denver')
-        elf.assertEqual(x.state, 'CO')
-        elf.assertEqual(x.zipcode, '80123')
+        self.assertEqual(x.city, 'Denver')
+        self.assertEqual(x.state, 'CO')
+        self.assertEqual(x.zipcode, 80123)
 
     def test_help(self):
         self.assertTrue(True)
+
 
 class GuestCheckoutTestCase(TestCase):
     def setUp(self):
@@ -109,5 +125,3 @@ class GuestCheckoutTestCase(TestCase):
         response = cart(request)
 
         self.assertEqual(response.status_code, 200) # Make sure everything comes back OK
-        
-

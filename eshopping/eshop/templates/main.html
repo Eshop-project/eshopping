@@ -9,58 +9,19 @@
   <title>Eshopping</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
     integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.1/css/all.css"
+    integrity="sha384-gfdkjb5BdAXd+lj+gudLWI+BXq4IuLW5IT+brZEZsLFm++aCMlF1V92rMkPaX4PP" crossorigin="anonymous">
   <link rel="stylesheet" type="text/css" href="{% static 'css/main.css'%}">
 
-  <script type="text/javascript">
+  <script>
     var user = '{{request.user}}'
-
-    function getToken(name) {
-      let cookieValue = null;
-      if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-          const cookie = cookies[i].trim();
-          // Does this cookie string begin with the name we want?
-          if (cookie.substring(0, name.length + 1) === (name + '=')) {
-            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-            break;
-          }
-        }
-      }
-      return cookieValue;
-    }
-    const csrftoken = getToken('csrftoken');
-    // 
-    function getCookie(name){
-      var cookieArr= document.cookie.split(";");
-
-      for (var x=0; x< cookieArr.length; x++){
-        var cookiePair= cookieArr[x].split("=");
-
-        if(name== cookiePair[0].trim()){
-
-          return decodeURIComponent(cookiePair[1]);
-        }
-      }
-      return null;
-    }
-
-    var cart = JSON.parse(getCookie('cart'))
-    //d
-    if (cart ==undefined){
-      cart = {}
-      console.log('Cart Created!', cart)
-      document.cookie = 'cart='+ JSON.stringify(cart) + ";domain=;path=/"
-    }
-    console.log('Cart', cart)
-
   </script>
 </head>
 <!-- <img src= "{% static 'img/logo.PNG' %}" width="50xp" height="50xp"/>-->
 
 <body>
 
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <nav class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
     <a class="navbar-brand" href="{% url 'store' %}">Eshopping</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
       aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -70,20 +31,39 @@
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav mr-auto">
         <li class="nav-item active">
-          <a class="nav-link" href="{% url 'store' %}">Store <span class="sr-only">(current)</span></a>
+          <a class="nav-link" href="{% url 'store' %}">Store<span class="sr-only">(current)</span></a>
+        </li>
+        <li class="nav-item active">
+          <a class="nav-link" href="{% url 'about' %}">About Us<span class="sr-only">(current)</span></a>
+        </li>
+        <li class="nav-item active">
+          <a class="nav-link" href="{% url 'about' %}#Contact">Contact Us<span class="sr-only">(current)</span></a>
         </li>
       </ul>
 
       <div class="form-inline my-2 my-lg-0">
-        <a href="#" class="btn btn-success">Login</a>
-        <a href="{% url 'cart' %}">
-          <img id="cart-icon" src="{% static 'img/logo.PNG' %}">
+        {% if request.user.is_active %}
+        <span class="hello-msg" id="welcomeButton">
+          Hello, {{request.user}}
+        </span>
+        <span><a href="{% url 'logout' %}" class="btn btn-success">Logout </a></span>
+        {% else %}
+
+        <a href="{% url 'login' %}" class="btn btn-success">Login</a>
+        <a href="{% url 'register' %}" class="btn btn-success">Register</a>
+        {% endif %}
+
+        <a href="{% url 'cart' %}" id="cart-icon">
+          <svg width="2em" height="2em" viewBox="0 0 16 16" class="bi bi-cart" fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd"
+              d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM3.102 4l1.313 7h8.17l1.313-7H3.102zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm7 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2z" />
+          </svg>
         </a>
         <p id="cart-total">{{cartItems}}</p>
 
       </div>
   </nav>
-
   <div class="container">
     {% block content %}
 
@@ -100,7 +80,7 @@
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
     integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
     crossorigin="anonymous"></script>
-
+  <script type="text/javascript" src="{% static 'js/cookies.js' %}"></script>
   <script type="text/javascript" src="{% static 'js/cart.js' %}"></script>
 
 </body>
